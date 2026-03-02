@@ -1,41 +1,55 @@
-'''
-Script to load geographical data into a pandas DataFrame, and save it as a CSV file.
-'''
-
-from geopy.geocoders import Nominatim
+import requests
 import pandas as pd
 
 
-def get_geolocator(agent='h501-student'):
+def get_location_data(location):
     """
-    Initiate a Nominatim geolocator instance given an `agent`.
-
-    Parameters
-    ----------
-    agent : str, optional
-        Agent name for Nominatim, by default 'h501-student'
+    Fetch latitude, longitude, and type for a given location
+    using the Nominatim OpenStreetMap API.
     """
-    return Nominatim(user_agent=agent)
 
-def fetch_location_data(geolocator, loc):
-    location = geolocator.geocode(loc)
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        "q": location,
+        "format": "json",
+        "limit": 1
+    }
 
-    if location is None:
-        return None
-    
-    return {"location": loc, "latitude": location.latitude, "longitude": location.longitude, "type": location.geo_type}
+    try:
+        response = requests.get(url, params=params, timeout=5)
+        response.raise_for_status()
+        data = response.json()
 
-def build_geo_dataframe(locations):
-    geo_data = [fetch_location_data(geolocator, loc) for loc in locations]
-    
-    return pd.DataFrame(geo_data)
+        if not data:
+            return {
+                "Location": location,
+                "Latitude": float("nan"),
+                "Longitude": float("nan"),
+                "Type": float("nan")
+            }
+
+        result = data[0]
+
+        return {
+            "Location": location,
+            "Latitude": float(result.get("lat", float("nan"))),
+            "Longitude": float(result.get("lon", float("nan"))),
+            "Type": result.get("type", float("nan")).title()
+        }
+
+    except (requests.RequestException, ValueError):
+        return {
+            "Location": location,
+            "Latitude": float("nan"),
+            "Longitude": float("nan"),
+            "Type": float("nan")
+        }
 
 
-if __name__ == "__main__":
-    geo = get_geolocator()
+def load_locations(locations):
+    """
+    Load multiple locations into a pandas DataFrame.
+    """
 
-    locations = ["Museum of Modern Art", "iuyt8765(*&)", "Alaska", "Franklin's Barbecue", "Burj Khalifa"]
-
-    df = build_geo_dataframe(locations)
-
-    df.to_csv("./geo_data.csv")
+    results = [get_location_data(loc) for loc in locations]
+    return pd.DataFrame(results)
