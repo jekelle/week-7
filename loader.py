@@ -3,10 +3,7 @@ import pandas as pd
 
 
 def get_location_data(location):
-    """
-    Fetch latitude, longitude, and type for a given location
-    using the Nominatim OpenStreetMap API.
-    """
+  
 
     url = "https://nominatim.openstreetmap.org/search"
     params = {
@@ -47,9 +44,7 @@ def get_location_data(location):
 
 
 def load_locations(locations):
-    """
-    Load multiple locations into a pandas DataFrame.
-    """
+ 
 
     results = [get_location_data(loc) for loc in locations]
     return pd.DataFrame(results)
