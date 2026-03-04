@@ -4,7 +4,7 @@ from loader import *
 
 class TestLoader(unittest.TestCase):
     def test_valid_locations(self):
-        # your code here
+    
         return None
 
     def test_invalid_location(self):
