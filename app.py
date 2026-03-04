@@ -10,7 +10,7 @@ st.write(
 ...
 ''')
 
-# currently set for integer input
+
 amount = st.number_input("Exercise Input: ", 
                          value=None, 
                          step=1, 
